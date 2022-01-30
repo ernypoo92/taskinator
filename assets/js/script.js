@@ -237,7 +237,7 @@ var loadTasks = function () {
     //Gets task items from localStorage.
     var tasksLoaded = localStorage.getItem("tasks");
     console.log (tasksLoaded);
-    if (tasksLoaded === null){
+    if (!tasksLoaded){
         tasks = [];
         return false;
     }
