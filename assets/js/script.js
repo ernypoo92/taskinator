@@ -71,6 +71,8 @@ var createTaskEl = function(taskDataObj) {
     taskDataObj.id = taskIdCounter;
     tasks.push(taskDataObj);
 
+    saveTasks();
+
     // increase task counter for next unique id
     taskIdCounter++;
 };
@@ -166,6 +168,8 @@ var completeEditTask = function(taskName, taskType, taskId) {
         }
     };
 
+    saveTasks();
+
     alert("Task Updated!");
 
     // undoes edit css adjustments
@@ -190,6 +194,8 @@ var deleteTask = function(taskId) {
 
     // reassign tasks array to be the same as updatedTaskArr
     tasks = updatedTaskArr;
+
+    saveTasks();
 };
 
 var taskStatusChangeHandler = function(event) {
@@ -219,10 +225,66 @@ var taskStatusChangeHandler = function(event) {
             tasks[i].status = statusValue;
         }
     }
+
+    saveTasks();
 };
+
+var saveTasks = function() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+var loadTasks = function () {
+    //Gets task items from localStorage.
+    var tasksLoaded = localStorage.getItem("tasks");
+    console.log (tasksLoaded);
+    if (tasksLoaded === null){
+        tasks = [];
+        return false;
+    }
+    
+    // Converts tasks from the string format back into an array of objects.
+    tasksLoaded = JSON.parse(tasksLoaded);
+    console.log (tasksLoaded);
+    // Iterates through a tasks array and creates task elements on the page from it.
+    for (var i = 0; i < tasksLoaded.length; i++ ) {
+        
+        tasksLoaded[i].id = taskIdCounter
+
+        // create list item
+        var listItemEl = document.createElement("li");
+        listItemEl.className = "task-item";
+
+        // add task id as a custom attribute
+        listItemEl.setAttribute("data-task-id", tasksLoaded[i].id);
+
+        // create div to hold task info and add to list item
+        var taskInfoEl = document.createElement("div");
+        taskInfoEl.className = "task-info";
+        
+        // add HTML content to div
+        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasksLoaded[i].name + "</h3><span class='task-type'>" + tasksLoaded[i].type + "</span>";
+        listItemEl.appendChild(taskInfoEl);
+
+        // add edit, delete, and status change to div
+        var taskActionsEl = createTaskActions(taskIdCounter);
+        listItemEl.appendChild(taskActionsEl);
+
+        // add entire list item to list
+        tasksToDoEl.appendChild(listItemEl);
+
+        // add new object to task array
+        tasksLoaded[i].id = taskIdCounter;
+        tasks.push(tasksLoaded[i].id);
+
+        // increase task counter for next unique id
+        taskIdCounter++;
+    }
+};
+
 
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
 
 pageContentEl.addEventListener("click", taskButtonHandler);
 
 formEl.addEventListener("submit", taskFormHandler);
+loadTasks();
